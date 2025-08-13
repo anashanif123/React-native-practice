@@ -1,15 +1,27 @@
-import { Text, View } from "react-native";
+import { createHomeStyles } from "@/assets/styles/home.styles";
+import Header from "@/components/Header";
+import TodoInput from "@/components/TodoInput";
+import useTheme from "@/hooks/useTheme";
+import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 export default function Index() {
+  const { toggleDarkMode, colors } = useTheme();
+  
+  const homeStyles = createHomeStyles(colors);
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+<LinearGradient colors={colors.gradients.background} style={homeStyles.container}>
+  <StatusBar barStyle={colors.statusBarStyle} />
+  <SafeAreaView style={homeStyles.safeArea}>
+    <Header/>
+    <TodoInput/>
+      <TouchableOpacity onPress={toggleDarkMode}>
+        <Text>toogle the mood</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  </LinearGradient>
+);
 }

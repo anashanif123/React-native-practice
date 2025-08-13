@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Children, createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+
 export interface ColorScheme {
   bg: string;
   surface: string;
@@ -53,7 +54,7 @@ const lightColors: ColorScheme = {
     input: "#ffffff",
     editInput: "#ffffff",
   },
-  statusBarStyle: "dark-content" as const,
+  statusBarStyle: "dark-content",
 };
 
 const darkColors: ColorScheme = {
@@ -81,7 +82,7 @@ const darkColors: ColorScheme = {
     input: "#1e293b",
     editInput: "#0f172a",
   },
-  statusBarStyle: "light-content" as const,
+  statusBarStyle: "light-content",
 };
 
 interface ThemeContextType {
@@ -89,33 +90,39 @@ interface ThemeContextType {
   toggleDarkMode: () => void;
   colors: ColorScheme;
 }
-const ThemeContext = createContext<undefined | ThemeContextType>(undefined);
 
-export const ThemeProvider = ({children}:{children:ReactNode}) =>{
-    const [isDarkMode,setisDarkMode] = useState(false);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-    useEffect(()=>{
-        AsyncStorage.getItem('darkMode').then((value)=>{
-            if (value) setisDarkMode(JSON.parse(value))
-    
-            });
-    
-        },[]);
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-const toggleDarkMode = async () =>{
-    const newMode =!isDarkMode;
-    setisDarkMode(newMode);
-    await AsyncStorage.setItem('darkMode',JSON.stringify(newMode))
-}
-const colors = isDarkMode ? darkColors : lightColors;
-return(
-    <ThemeContext.Provider value={{isDarkMode,toggleDarkMode,colors}}>
-       {children}
+  useEffect(() => {
+    AsyncStorage.getItem("darkMode").then((value) => {
+      if (value !== null) setIsDarkMode(JSON.parse(value));
+    });
+  }, []);
+
+  const toggleDarkMode = async () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    await AsyncStorage.setItem("darkMode", JSON.stringify(newMode));
+  };
+
+  const colors = isDarkMode ? darkColors : lightColors;
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, colors }}>
+      {children}
     </ThemeContext.Provider>
-)
-
-const useTheme = () => {
-
+  );
 };
 
-export default useTheme
+const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
+};
+
+export default useTheme;
