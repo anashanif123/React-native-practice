@@ -41,11 +41,13 @@ export const updateTodo = mutation({
   args: { 
     id: v.id("todos"),
     text: v.string(),
-   },
-  handler: async (ctx, args) => {
-    await ctx.db.delete(args.id);
   },
-});
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      text: args.text
+    });
+  },
+})
 
 export const clearAllTodos = mutation({
   handler: async (ctx, args) => {
